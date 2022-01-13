@@ -54,8 +54,8 @@
 /* Default values of configuration
  * If EEPROM is erased, then configuration options have following values
  */
-#define THRESHOLD_DIM    13     /**< Voltage threshold for 'dark' condition. */
-#define THRESHOLD_BRIGHT 280    /**< Voltage threshold for 'light' condition. */
+#define THRESHOLD_DIM    150    /**< Voltage threshold for 'dark' condition. */
+#define THRESHOLD_BRIGHT 630    /**< Voltage threshold for 'light' condition. */
 #define LIT_LENGTH       1      /**< Length of time LEDs will be lit in multiples of 15 min. */
 
 /* FSM states.
@@ -562,17 +562,18 @@ int main(void)
             {
                 PORTB &= ~(_BV(LED_PIN));
                 state = STATE_NIGHT;
-                tl.threshold = EEPROM_read(EEPROM_BRIGHT_L);
-                tl.threshold |= (EEPROM_read(EEPROM_BRIGHT_H) << 8);
-                if (tl.threshold == 0xFFFF)
-                {
-                    tl.threshold = THRESHOLD_BRIGHT;
-                }
             }
         }
         else if (STATE_NIGHT == state)
         {
             sleeper();
+            
+            tl.threshold = EEPROM_read(EEPROM_BRIGHT_L);
+            tl.threshold |= (EEPROM_read(EEPROM_BRIGHT_H) << 8);
+            if (tl.threshold == 0xFFFF)
+            {
+                tl.threshold = THRESHOLD_BRIGHT;
+            }
             
             uint16_t vlt = get_adc();
             if (vlt >= tl.threshold)
